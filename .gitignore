@@ -1,5 +1,76 @@
+# Build artifacts
 bin/
 obj/
+out/
+artifacts/
+
+# Rider / IntelliJ
+.idea/
+*.sln.iml
+*.iml
+*.ipr
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/.idea.*
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Tooling
+_ReSharper*/
+*.resharper
+*.dotCover
+*.vs/
+.vscode/
+
+# Package manager
 /packages/
-riderModule.iml
-/_ReSharper.Caches/
+/node_modules/
+
+# Entity Framework
+Migrations/
+
+# Database files
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+# Config files (secrets)
+appsettings.json
+appsettings.*.json
+
+# Docker
+docker-compose.override.yml
+
+# Coverage reports
+coverage/
+TestResults/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Global JetBrains Rider caches
+/.idea/.idea.*
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/dataSources/
+.idea/httpRequests/
+
+# Publish artifacts
+publish/
