@@ -1,0 +1,18 @@
+﻿### Register new user
+POST http://localhost:5085/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "pawelpawel",
+  "email": "pawel@pawel.com",
+  "password": "StrongPassword123!"
+}
+
+### Login user
+POST http://localhost:5085/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "pawel@pawel.com",
+  "password": "StrongPassword123!"
+}
