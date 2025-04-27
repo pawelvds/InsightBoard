@@ -9,5 +9,6 @@ public class NoteProfile : Profile
     public NoteProfile()
     {
         CreateMap<Note, NoteDto>();
+        CreateMap<CreateNoteRequest, Note>();
     }
 }
