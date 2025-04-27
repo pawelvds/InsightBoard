@@ -26,12 +26,13 @@ public class NoteService: INoteService
         return _mapper.Map<IEnumerable<NoteDto>>(notes);
     }
     
-    public async Task<NoteDto> CreateAsync(CreateNoteRequest request)
+    public async Task<NoteDto> CreateAsync(CreateNoteRequest request, string userId)
     {
         var note = new Note
         {
             Title = request.Title,
             Content = request.Content,
+            AuthorId = userId,
         };
         
         _context.Notes.Add(note);
