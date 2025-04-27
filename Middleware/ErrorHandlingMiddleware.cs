@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using InsightBoard.Api.Exceptions;
 
 namespace InsightBoard.Api.Middleware;
 
@@ -20,31 +21,43 @@ public class ErrorHandlingMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred.");
-            
-            context.Response.ContentType = "application/json";
+            _logger.LogError(ex, "An API exception occurred.");
 
-            context.Response.StatusCode = ex switch
-            {
-                UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-                ArgumentException => (int)HttpStatusCode.BadRequest,
-                KeyNotFoundException => (int)HttpStatusCode.NotFound,
-                _ => (int)HttpStatusCode.InternalServerError
-            };
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = ex.StatusCode;
 
             var response = new
             {
                 status = context.Response.StatusCode,
                 message = ex.Message
             };
-            
+
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
             var json = JsonSerializer.Serialize(response, options);
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unhandled exception occurred.");
+            
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            var response = new
+            {
+                status = context.Response.StatusCode,
+                message = "Something went wrong. Please contact the developers team."
+            };
+            
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(response, options);
             
             await context.Response.WriteAsync(json);
+
         }
     }
 }

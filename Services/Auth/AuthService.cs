@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using InsightBoard.Api.Data;
 using InsightBoard.Api.DTOs.Auth;
+using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ public class AuthService : IAuthService
     {
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
         {
-            throw new Exception("User with this email already exists.");
+            throw new BadRequestException("User with this email already exists.");
         }
 
         var user = new User
@@ -49,14 +50,14 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
-            throw new Exception("Wrong email or password.");
+            throw new UnauthorizedException("Wrong email or password.");
         }
 
         var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
         if (result == PasswordVerificationResult.Failed)
         {
-            throw new Exception("Wrong email or password.");
+            throw new UnauthorizedException("Wrong email or password.");
         }
 
         return GenerateAuthResponse(user);
