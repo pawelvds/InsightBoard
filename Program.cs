@@ -34,6 +34,7 @@ builder.Services.AddScoped<INoteService, NoteService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<InsightBoard.Api.Middleware.ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
