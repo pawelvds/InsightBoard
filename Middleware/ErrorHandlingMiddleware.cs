@@ -25,7 +25,14 @@ public class ErrorHandlingMiddleware
             _logger.LogError(ex, "An unhandled exception occurred.");
             
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            context.Response.StatusCode = ex switch
+            {
+                UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+                ArgumentException => (int)HttpStatusCode.BadRequest,
+                KeyNotFoundException => (int)HttpStatusCode.NotFound,
+                _ => (int)HttpStatusCode.InternalServerError
+            };
 
             var response = new
             {
@@ -33,7 +40,9 @@ public class ErrorHandlingMiddleware
                 message = ex.Message
             };
             
-            var json = JsonSerializer.Serialize(response);
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
+            var json = JsonSerializer.Serialize(response, options);
             
             await context.Response.WriteAsync(json);
         }
