@@ -42,4 +42,14 @@ public class NoteService: INoteService
         
         return _mapper.Map<NoteDto>(note);
     }
+
+    public async Task<IEnumerable<NoteDto>> GetPublicNotesAsync()
+    {
+        var publicNotes = await _context.Notes
+            .Where(n => n.IsPublic)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+        
+        return _mapper.Map<IEnumerable<NoteDto>>(publicNotes);
+    }
 }
