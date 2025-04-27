@@ -23,7 +23,14 @@ public class NoteController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NoteDto>>> GetAll()
     {
-        var notes = await _noteService.GetAllAsync();
+        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
+        var notes = await _noteService.GetAllByUserIdAsync(userId);
         return Ok(notes);
     }
 

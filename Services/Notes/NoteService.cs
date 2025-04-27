@@ -16,15 +16,17 @@ public class NoteService: INoteService
         _context = context;
         _mapper = mapper;
     }
-
-    public async Task<IEnumerable<NoteDto>> GetAllAsync()
+    
+    public async Task<IEnumerable<NoteDto>> GetAllByUserIdAsync(string userId)
     {
         var notes = await _context.Notes
+            .Where(n => n.AuthorId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
-        
+
         return _mapper.Map<IEnumerable<NoteDto>>(notes);
     }
+
     
     public async Task<NoteDto> CreateAsync(CreateNoteRequest request, string userId)
     {
