@@ -1,6 +1,9 @@
 ﻿using InsightBoard.Api.DTOs.Auth;
 using InsightBoard.Api.Services.Auth;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using LoginRequest = InsightBoard.Api.DTOs.Auth.LoginRequest;
+using RegisterRequest = InsightBoard.Api.DTOs.Auth.RegisterRequest;
 
 namespace InsightBoard.Api.Controllers;
 
@@ -27,5 +30,12 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.LoginAsync(request);
         return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(RefreshTokenRequest request)
+    {
+        var response = await _authService.RefreshTokenAsync(request);
+        return Ok(response);
     }
 }

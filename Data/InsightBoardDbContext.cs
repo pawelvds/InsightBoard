@@ -12,4 +12,7 @@ public DbSet<Note> Notes => Set<Note>();
          public DbSet<Question> Questions => Set<Question>();
          public DbSet<Answer> Answers => Set<Answer>();
          public DbSet<User> Users => Set<User>();
+         
+         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 }

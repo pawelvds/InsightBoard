@@ -6,8 +6,11 @@ using InsightBoard.Api.DTOs.Auth;
 using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using LoginRequest = InsightBoard.Api.DTOs.Auth.LoginRequest;
+using RegisterRequest = InsightBoard.Api.DTOs.Auth.RegisterRequest;
 
 namespace InsightBoard.Api.Services.Auth;
 
@@ -40,8 +43,17 @@ public class AuthService : IAuthService
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
+        
+        var refreshToken = new RefreshToken
+        {
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
 
-        return GenerateAuthResponse(user);
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return GenerateAuthResponse(user, refreshToken.Id);
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -60,10 +72,46 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Wrong email or password.");
         }
 
-        return GenerateAuthResponse(user);
+
+        var refreshToken = new RefreshToken
+        {
+            UserId = user.Id,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return GenerateAuthResponse(user, refreshToken.Id);
     }
 
-    private AuthResponse GenerateAuthResponse(User user)
+    public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        var refreshToken = await _context.RefreshTokens
+            .Include(rt => rt.User)
+            .SingleOrDefaultAsync(r => r.Id == request.RefreshToken);
+
+        if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresAt < DateTime.UtcNow)
+        {
+            throw new UnauthorizedException("Invalid refresh token.");
+        }
+
+
+        refreshToken.IsRevoked = true;
+
+        var newRefreshToken = new RefreshToken
+        {
+            UserId = refreshToken.UserId,
+            ExpiresAt = DateTime.UtcNow.AddDays(7)
+        };
+
+        _context.RefreshTokens.Add(newRefreshToken);
+        await _context.SaveChangesAsync();
+
+        return GenerateAuthResponse(refreshToken.User, newRefreshToken.Id);
+    }
+
+    private AuthResponse GenerateAuthResponse(User user, string refreshTokenId)
     {
         var claims = new List<Claim>
         {
@@ -75,7 +123,7 @@ public class AuthService : IAuthService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var expires = DateTime.UtcNow.AddDays(7);
+        var expires = DateTime.UtcNow.AddMinutes(15); 
 
         var token = new JwtSecurityToken(
             _configuration["Jwt:Issuer"],
@@ -88,7 +136,8 @@ public class AuthService : IAuthService
         return new AuthResponse
         {
             Token = new JwtSecurityTokenHandler().WriteToken(token),
-            Expiration = expires
+            Expiration = expires,
+            RefreshToken = refreshTokenId
         };
     }
 }
