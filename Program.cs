@@ -1,5 +1,6 @@
 using System.Text;
 using InsightBoard.Api.Data;
+using InsightBoard.Api.Middleware;
 using InsightBoard.Api.Services.Auth;
 using InsightBoard.Api.Services.Notes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +14,8 @@ builder.Services.AddDbContext<InsightBoardDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -29,12 +32,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<INoteService, NoteService>();
-
 var app = builder.Build();
 
-app.UseMiddleware<InsightBoard.Api.Middleware.ErrorHandlingMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>(); 
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
