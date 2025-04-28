@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using InsightBoard.Api.Data;
 using InsightBoard.Api.DTOs.Notes;
+using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,5 +42,43 @@ public class NoteService: INoteService
         await _context.SaveChangesAsync();
         
         return _mapper.Map<NoteDto>(note);
+    }
+
+    public async Task<IEnumerable<NoteDto>> GetPublicNotesAsync()
+    {
+        var publicNotes = await _context.Notes
+            .Where(n => n.IsPublic)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
+        
+        return _mapper.Map<IEnumerable<NoteDto>>(publicNotes);
+    }
+
+    public async Task PublishNoteAsync(string noteId, string userId)
+    {
+        var note = await _context.Notes.FindAsync(noteId);
+        
+        if (note == null)
+            throw new NotFoundException("Note not found");
+        
+        if (note.AuthorId != userId)
+            throw new UnauthorizedException("You are not authorized to view this note");
+        
+        note.IsPublic = true;
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UnpublishNoteAsync(string noteId, string userId)
+    {
+        var note = await _context.Notes.FindAsync(noteId);
+        
+        if (note == null)
+            throw new NotFoundException("Note not found");
+        
+        if (note.AuthorId != userId)
+            throw new UnauthorizedException("You are not authorized to view this note");
+        
+        note.IsPublic = false;
+        await _context.SaveChangesAsync();
     }
 }

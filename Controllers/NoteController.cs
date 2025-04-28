@@ -47,4 +47,32 @@ public class NoteController : ControllerBase
         var createdNote = await _noteService.CreateAsync(request, userId);
         return CreatedAtAction(nameof(GetAll), new { id = createdNote.Id }, createdNote);
     }
+
+    [HttpPatch("{id}/publish")]
+    public async Task<IActionResult> Publish(string id)
+    {
+        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        
+        if (userId == null)
+            return Unauthorized();
+        
+        await _noteService.PublishNoteAsync(id, userId);
+        
+        return NoContent();
+    }
+    
+    [HttpPatch("{id}/unpublish")]
+    public async Task<IActionResult> Unpublish(string id)
+    {
+        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        
+        if (userId == null)
+            return Unauthorized();
+        
+        await _noteService.PublishNoteAsync(id, userId);
+        
+        return NoContent();
+    }
+    
+    
 }
