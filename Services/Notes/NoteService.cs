@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using InsightBoard.Api.Data;
+using InsightBoard.Api.DTOs.Common;
 using InsightBoard.Api.DTOs.Notes;
 using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Models;
@@ -80,5 +81,33 @@ public class NoteService: INoteService
         
         note.IsPublic = false;
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponse<NoteDto>> GetPublicNotesPagedAsync(int pageNumber, int pageSize, string? sortBy)
+    {
+        var query = _context.Notes
+            .Where(n => n.IsPublic);
+
+        query = sortBy switch
+        {
+            "created_at" => query.OrderByDescending(n => n.CreatedAt),
+            "created_at_desc" => query.OrderByDescending(n => n.CreatedAt),
+            _ => query.OrderByDescending(n => n.CreatedAt)
+        };
+        
+        var totalrecords = await query.CountAsync();
+        
+        var notes = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResponse<NoteDto>
+        {
+            Data = _mapper.Map<IEnumerable<NoteDto>>(notes),
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalRecords = totalrecords
+        };
     }
 }
