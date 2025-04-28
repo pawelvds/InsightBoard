@@ -69,7 +69,7 @@ public class NoteController : ControllerBase
         if (userId == null)
             return Unauthorized();
         
-        await _noteService.PublishNoteAsync(id, userId);
+        await _noteService.UnpublishNoteAsync(id, userId);
         
         return NoContent();
     }

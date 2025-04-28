@@ -1,4 +1,5 @@
-﻿using InsightBoard.Api.DTOs.Notes;
+﻿using InsightBoard.Api.DTOs.Common;
+using InsightBoard.Api.DTOs.Notes;
 using InsightBoard.Api.Services.Notes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,13 @@ public class PublicNoteController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<NoteDto>>> GetPublicNotes()
+    public async Task<ActionResult<PagedResponse<NoteDto>>> GetPublicNotes(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = "createdAt_desc")
     {
-        var notes = await _noteService.GetPublicNotesAsync();
+        var notes = await _noteService.GetPublicNotesPagedAsync(pageNumber, pageSize, sortBy);
         return Ok(notes);
     }
+
 }
