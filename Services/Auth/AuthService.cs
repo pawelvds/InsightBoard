@@ -132,6 +132,8 @@ public class AuthService : IAuthService
             expires: expires,
             signingCredentials: creds
         );
+        
+        Console.WriteLine("JWT key length: " + (_configuration["Jwt:Key"]?.Length ?? 0));
 
         return new AuthResponse
         {
