@@ -1,13 +1,17 @@
-﻿import { useEffect } from "react"
+﻿import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
-import { Card } from "../components/ui/card"
-import { useNotes } from "../hooks/useNotes"
+import { useNotes, Note } from "../hooks/useNotes"
 import { NewNoteDialog } from "../components/NewNoteDialog"
+import { NoteCard } from "../components/NoteCard"
+import { EditNoteDialog } from "../components/EditNoteDialog"
 
 function Dashboard() {
     const navigate = useNavigate()
     const { notes, loading, error, refresh } = useNotes()
+
+    const [editingNote, setEditingNote] = useState<Note | null>(null)
+    const [editOpen, setEditOpen] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem("token")
@@ -20,6 +24,16 @@ function Dashboard() {
         localStorage.removeItem("token")
         localStorage.removeItem("refreshToken")
         navigate("/login")
+    }
+
+    const handleEdit = (note: Note) => {
+        setEditingNote(note)
+        setEditOpen(true)
+    }
+
+    const handleDelete = (id: string) => {
+        console.log("Delete", id)
+        // TODO: implement deletion logic
     }
 
     return (
@@ -51,15 +65,22 @@ function Dashboard() {
             {!loading && notes.length > 0 && (
                 <div className="grid gap-4">
                     {notes.map((note) => (
-                        <Card key={note.id} className="p-4">
-                            <h2 className="text-xl font-semibold">{note.title}</h2>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                {note.content}
-                            </p>
-                        </Card>
+                        <NoteCard
+                            key={note.id}
+                            note={note}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
                     ))}
                 </div>
             )}
+
+            <EditNoteDialog
+                note={editingNote}
+                open={editOpen}
+                onClose={() => setEditOpen(false)}
+                onNoteUpdated={refresh}
+            />
         </div>
     )
 }
