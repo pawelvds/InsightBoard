@@ -7,7 +7,7 @@ import { NewNoteDialog } from "../components/NewNoteDialog"
 
 function Dashboard() {
     const navigate = useNavigate()
-    const { notes, loading, error } = useNotes()
+    const { notes, loading, error, refresh } = useNotes()
 
     useEffect(() => {
         const token = localStorage.getItem("token")
@@ -27,7 +27,7 @@ function Dashboard() {
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Your Dashboard</h1>
                 <div className="flex gap-2">
-                    <NewNoteDialog onNoteCreated={() => window.location.reload()} />
+                    <NewNoteDialog onNoteCreated={refresh} />
                     <Button variant="destructive" onClick={handleLogout}>
                         Logout
                     </Button>
