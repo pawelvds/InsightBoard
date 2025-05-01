@@ -1,21 +1,19 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using InsightBoard.Api.DTOs.Notes;
-using InsightBoard.Api.Models;
 using InsightBoard.Api.Services.Notes;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InsightBoard.Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
-public class NoteController : ControllerBase
+[Route("api/notes")]
+public class NotesController : ControllerBase
 {
     private readonly INoteService _noteService;
 
-    public NoteController(INoteService noteService)
+    public NotesController(INoteService noteService)
     {
         _noteService = noteService;
     }
@@ -23,13 +21,13 @@ public class NoteController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NoteDto>>> GetAll()
     {
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (userId == null)
         {
             return Unauthorized();
         }
-        
+
         var notes = await _noteService.GetAllByUserIdAsync(userId);
         return Ok(notes);
     }
@@ -37,13 +35,13 @@ public class NoteController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<NoteDto>> Create([FromBody] CreateNoteRequest request)
     {
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (userId == null)
         {
             return Unauthorized();
         }
-        
+
         var createdNote = await _noteService.CreateAsync(request, userId);
         return CreatedAtAction(nameof(GetAll), new { id = createdNote.Id }, createdNote);
     }
@@ -51,28 +49,26 @@ public class NoteController : ControllerBase
     [HttpPatch("{id}/publish")]
     public async Task<IActionResult> Publish(string id)
     {
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (userId == null)
             return Unauthorized();
-        
+
         await _noteService.PublishNoteAsync(id, userId);
-        
+
         return NoContent();
     }
-    
+
     [HttpPatch("{id}/unpublish")]
     public async Task<IActionResult> Unpublish(string id)
     {
-        var userId = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (userId == null)
             return Unauthorized();
-        
+
         await _noteService.UnpublishNoteAsync(id, userId);
-        
+
         return NoContent();
     }
-    
-    
 }

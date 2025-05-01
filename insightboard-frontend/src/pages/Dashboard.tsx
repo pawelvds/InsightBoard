@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "../components/ui/button"
 import { Card } from "../components/ui/card"
 import { useNotes } from "../hooks/useNotes"
+import { NewNoteDialog } from "../components/NewNoteDialog"
 
 function Dashboard() {
     const navigate = useNavigate()
@@ -25,9 +26,12 @@ function Dashboard() {
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Your Dashboard</h1>
-                <Button variant="destructive" onClick={handleLogout}>
-                    Logout
-                </Button>
+                <div className="flex gap-2">
+                    <NewNoteDialog onNoteCreated={() => window.location.reload()} />
+                    <Button variant="destructive" onClick={handleLogout}>
+                        Logout
+                    </Button>
+                </div>
             </div>
 
             {loading && (
