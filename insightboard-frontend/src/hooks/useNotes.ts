@@ -6,6 +6,7 @@ export interface Note {
     title: string
     content: string
     createdAt: string
+    published: boolean
 }
 
 export function useNotes() {
