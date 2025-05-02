@@ -45,6 +45,30 @@ public class NotesController : ControllerBase
         var createdNote = await _noteService.CreateAsync(request, userId);
         return CreatedAtAction(nameof(GetAll), new { id = createdNote.Id }, createdNote);
     }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] UpdateNoteRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+            return Unauthorized();
+
+        await _noteService.UpdateNoteAsync(id, request, userId);
+        return NoContent();
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+            return Unauthorized();
+
+        await _noteService.DeleteNoteAsync(id, userId);
+        return NoContent();
+    }
 
     [HttpPatch("{id}/publish")]
     public async Task<IActionResult> Publish(string id)
