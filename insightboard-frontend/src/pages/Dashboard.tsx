@@ -8,7 +8,7 @@ import { EditNoteDialog } from "../components/EditNoteDialog"
 
 function Dashboard() {
     const navigate = useNavigate()
-    const { notes, loading, error, refresh } = useNotes()
+    const { notes, loading, error, refresh, deleteNote } = useNotes()
 
     const [editingNote, setEditingNote] = useState<Note | null>(null)
     const [editOpen, setEditOpen] = useState(false)
@@ -31,9 +31,15 @@ function Dashboard() {
         setEditOpen(true)
     }
 
-    const handleDelete = (id: string) => {
-        console.log("Delete", id)
-        // TODO: implement deletion logic
+    const handleDelete = async (id: string) => {
+        const confirmed = window.confirm("Are you sure you want to delete this note?")
+        if (!confirmed) return
+
+        try {
+            await deleteNote(id)
+        } catch (err) {
+            console.error("Failed to delete note", err)
+        }
     }
 
     return (

@@ -25,8 +25,14 @@ export function useNotes() {
         }
     }, [])
 
+    const deleteNote = useCallback(async (id: string) => {
+        await api.delete(`/notes/${id}`)
+        await fetchNotes()
+    }, [fetchNotes])
+
     useEffect(() => {
         fetchNotes()
     }, [fetchNotes])
 
-    return { notes, loading, error, refresh: fetchNotes }}
+    return { notes, loading, error, refresh: fetchNotes, deleteNote }
+}
