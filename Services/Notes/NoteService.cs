@@ -44,6 +44,42 @@ public class NoteService: INoteService
         
         return _mapper.Map<NoteDto>(note);
     }
+    
+    public async Task UpdateNoteAsync(string id, UpdateNoteRequest request, string userId)
+    {
+        if (!Guid.TryParse(id, out var noteGuid))
+        {
+            throw new BadRequestException("Invalid note ID.");
+        }
+
+        var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == noteGuid && n.AuthorId == userId);
+        if (note == null)
+        {
+            throw new NotFoundException("Note not found.");
+        }
+
+        note.Title = request.Title;
+        note.Content = request.Content;
+
+        await _context.SaveChangesAsync();
+    }
+    
+    public async Task DeleteNoteAsync(string id, string userId)
+    {
+        if (!Guid.TryParse(id, out var noteGuid))
+        {
+            throw new BadRequestException("Invalid note ID.");
+        }
+
+        var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == noteGuid && n.AuthorId == userId);
+        if (note == null)
+        {
+            throw new NotFoundException("Note not found.");
+        }
+
+        _context.Notes.Remove(note);
+        await _context.SaveChangesAsync();
+    }
 
     public async Task<IEnumerable<NoteDto>> GetPublicNotesAsync()
     {

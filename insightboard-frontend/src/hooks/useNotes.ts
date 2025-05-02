@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react"
+﻿import { useCallback, useEffect, useState } from "react"
 import api from "../lib/api"
 
 export interface Note {
@@ -13,20 +13,26 @@ export function useNotes() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        async function fetchNotes() {
-            try {
-                const res = await api.get<Note[]>("/notes")
-                setNotes(res.data)
-            } catch {
-                setError("Failed to load notes")
-            } finally {
-                setLoading(false)
-            }
+    const fetchNotes = useCallback(async () => {
+        try {
+            setLoading(true)
+            const res = await api.get<Note[]>("/notes")
+            setNotes(res.data)
+        } catch {
+            setError("Failed to load notes")
+        } finally {
+            setLoading(false)
         }
-
-        fetchNotes()
     }, [])
 
-    return { notes, loading, error }
+    const deleteNote = useCallback(async (id: string) => {
+        await api.delete(`/notes/${id}`)
+        await fetchNotes()
+    }, [fetchNotes])
+
+    useEffect(() => {
+        fetchNotes()
+    }, [fetchNotes])
+
+    return { notes, loading, error, refresh: fetchNotes, deleteNote }
 }

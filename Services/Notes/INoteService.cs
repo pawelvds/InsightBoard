@@ -7,6 +7,8 @@ public interface INoteService
 {
     Task<IEnumerable<NoteDto>> GetAllByUserIdAsync(string userId);
     Task<NoteDto> CreateAsync(CreateNoteRequest request, string userId);
+    Task UpdateNoteAsync(string id, UpdateNoteRequest request, string userId);
+    Task DeleteNoteAsync(string id, string userId);
     Task<IEnumerable<NoteDto>> GetPublicNotesAsync();
     Task PublishNoteAsync(string noteId, string userId);
     Task UnpublishNoteAsync(string noteId, string userId);
