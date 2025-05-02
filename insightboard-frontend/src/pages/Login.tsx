@@ -1,5 +1,5 @@
 ﻿import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -73,6 +73,12 @@ export default function Login() {
                             <Button type="submit" className="w-full">
                                 Sign In
                             </Button>
+                            <p className="text-center text-sm text-muted-foreground mt-2">
+                                Don’t have an account?{" "}
+                                <Link to="/register" className="text-primary underline">
+                                    Sign up
+                                </Link>
+                            </p>
                         </CardContent>
                     </form>
                 </Card>
