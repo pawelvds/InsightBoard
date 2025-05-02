@@ -4,7 +4,6 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import { Toaster} from "sonner";
 
-
 function App() {
     return (
         <Router>

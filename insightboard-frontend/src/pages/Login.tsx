@@ -1,62 +1,73 @@
-﻿import { useState } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+﻿import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import axios from "axios"
 
-function Login() {
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+
+export default function Login() {
     const navigate = useNavigate()
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setError('')
-
+        setError("")
         try {
-            const response = await axios.post('http://localhost:5085/api/auth/login', {
+            const res = await axios.post("http://localhost:5085/api/auth/login", {
                 email,
                 password,
             })
-
-            localStorage.setItem('token', response.data.token)
-            localStorage.setItem('refreshToken', response.data.refreshToken)
-
-            navigate('/dashboard')
-        } catch (err) {
-            setError('Invalid credentials')
+            localStorage.setItem("token", res.data.token)
+            localStorage.setItem("refreshToken", res.data.refreshToken)
+            navigate("/dashboard")
+        } catch {
+            setError("Invalid credentials")
         }
     }
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-50">
-            <div className="bg-white p-8 rounded shadow w-full max-w-sm">
-                <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full p-2 border rounded"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="w-full p-2 border rounded"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-                    >
-                        Sign In
-                    </button>
+        <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle className="text-2xl text-center">Sign in to your account</CardTitle>
+                </CardHeader>
+                <form onSubmit={handleSubmit}>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        {error && <p className="text-sm text-red-500">{error}</p>}
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-2">
+                        <Button type="submit" className="w-full">Sign In</Button>
+                        <p className="text-sm text-center text-muted-foreground">
+                            Don't have an account? <span className="text-primary underline cursor-pointer">Create one</span>
+                        </p>
+                    </CardFooter>
                 </form>
-            </div>
+            </Card>
         </div>
     )
 }
-
-export default Login
