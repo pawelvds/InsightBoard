@@ -45,7 +45,7 @@ public class NotesController : ControllerBase
         var createdNote = await _noteService.CreateAsync(request, userId);
         return CreatedAtAction(nameof(GetAll), new { id = createdNote.Id }, createdNote);
     }
-    
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, [FromBody] UpdateNoteRequest request)
     {
@@ -57,7 +57,7 @@ public class NotesController : ControllerBase
         await _noteService.UpdateNoteAsync(id, request, userId);
         return NoContent();
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -94,5 +94,13 @@ public class NotesController : ControllerBase
         await _noteService.UnpublishNoteAsync(id, userId);
 
         return NoContent();
+    }
+
+    [AllowAnonymous]
+    [HttpGet("public/{username}")]
+    public async Task<ActionResult<IEnumerable<NoteDto>>> GetPublicByUsername(string username)
+    {
+        var notes = await _noteService.GetPublicNotesAsync();
+        return Ok(notes);
     }
 }

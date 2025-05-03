@@ -146,4 +146,25 @@ public class NoteService: INoteService
             TotalRecords = totalrecords
         };
     }
+    
+    public async Task<IEnumerable<NoteDto>> GetPublicNotesByUsernameAsync(string username)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        if (user == null)
+            throw new NotFoundException("User not found.");
+
+        return await _context.Notes
+            .Where(n => n.AuthorId == user.Id && n.IsPublic)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => new NoteDto
+            {
+                Id = $"{n.Id}",
+                Title = n.Title,
+                Content = n.Content,
+                CreatedAt = n.CreatedAt
+            })
+            .ToListAsync();
+    }
+
 }

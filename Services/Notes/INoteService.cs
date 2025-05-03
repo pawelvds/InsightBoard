@@ -13,5 +13,6 @@ public interface INoteService
     Task PublishNoteAsync(string noteId, string userId);
     Task UnpublishNoteAsync(string noteId, string userId);
     Task<PagedResponse<NoteDto>> GetPublicNotesPagedAsync(int pageNumber, int pageSize, string? sortBy);
+    Task<IEnumerable<NoteDto>> GetPublicNotesByUsernameAsync(string username);
  
 }
