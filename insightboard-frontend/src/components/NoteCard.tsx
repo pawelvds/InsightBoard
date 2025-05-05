@@ -11,6 +11,7 @@ import { Note } from "@/hooks/useNotes"
 import { Pencil, Trash, Clipboard } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { useState, useEffect } from "react"
 
 interface NoteCardProps {
     note: Note
@@ -25,13 +26,32 @@ export function NoteCard({
                              onDelete,
                              onTogglePublish,
                          }: NoteCardProps) {
+    // Używamy lokalnego stanu do kontrolowania UI
+    const [isPublic, setIsPublic] = useState(note.isPublic)
+
+    // Synchronizujemy lokalny stan, gdy zmieniają się props z zewnątrz
+    useEffect(() => {
+        if (note.isPublic !== isPublic) {
+            setIsPublic(note.isPublic)
+        }
+    }, [note.isPublic])
+
     const handleCopy = async () => {
         await navigator.clipboard.writeText(note.content)
         toast.success("Note copied to clipboard")
     }
 
-    const handleToggle = (newState: boolean) => {
-        onTogglePublish?.(note.id, newState)
+    // Obsługa zmiany stanu przełącznika
+    const handleToggle = (checked: boolean) => {
+        console.log("Switch toggled to:", checked)
+
+        // Aktualizacja lokalnego stanu
+        setIsPublic(checked)
+
+        // Wywołanie funkcji z komponentu nadrzędnego
+        if (onTogglePublish) {
+            onTogglePublish(note.id, checked)
+        }
     }
 
     return (
@@ -39,19 +59,36 @@ export function NoteCard({
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-lg font-semibold">{note.title}</CardTitle>
+                        <CardTitle className="text-lg font-semibold">
+                            {note.title}
+                        </CardTitle>
                         <CardDescription className="text-xs">
                             Created: {format(new Date(note.createdAt), "dd MMM yyyy HH:mm")}
                         </CardDescription>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(note)}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onEdit(note)}
+                        >
                             <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={() => onDelete(note.id)}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-red-500 hover:bg-red-50"
+                            onClick={() => onDelete(note.id)}
+                        >
                             <Trash className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={handleCopy}
+                        >
                             <Clipboard className="h-4 w-4" />
                         </Button>
                     </div>
@@ -60,8 +97,13 @@ export function NoteCard({
             <CardContent className="text-sm text-muted-foreground whitespace-pre-wrap space-y-4">
                 <p>{note.content}</p>
                 <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="text-xs">{note.isPublic ? "Published" : "Private"}</span>
-                    <Switch checked={note.isPublic} onCheckedChange={handleToggle} />
+                    <span className="text-xs">{isPublic ? "Published" : "Private"}</span>
+
+                    {/* Kluczowe jest użycie i checked i onCheckedChange dla kontrolowanego komponentu */}
+                    <Switch
+                        checked={isPublic}
+                        onCheckedChange={handleToggle}
+                    />
                 </div>
             </CardContent>
         </Card>

@@ -19,26 +19,61 @@ export function useNotes() {
             setLoading(true)
             const res = await api.get<Note[]>("/notes")
             setNotes([...res.data])
-        } catch {
+        } catch (err) {
             setError("Failed to load notes")
+            console.error("Error fetching notes:", err)
         } finally {
             setLoading(false)
         }
     }, [])
 
     const deleteNote = useCallback(async (id: string) => {
-        await api.delete(`/notes/${id}`)
-        await fetchNotes()
-    }, [fetchNotes])
+        try {
+            await api.delete(`/notes/${id}`)
+            // Optymistycznie aktualizujemy stan
+            setNotes(prev => prev.filter(note => note.id !== id))
+        } catch (err) {
+            console.error("Error deleting note:", err)
+            setError("Failed to delete note")
+        }
+    }, [])
 
-    const toggleNoteVisibility = useCallback(async (id: string, makePublic: boolean) => {
-        console.log("TOGGLE VISIBILITY PATCH BODY", { isPublic: makePublic })
-        await api.patch(`/notes/${id}/visibility`, {
-            isPublic: makePublic,
-        })
+    const toggleNoteVisibility = useCallback(async (id: string, isPublic: boolean) => {
+        console.log("TOGGLE VISIBILITY:", { id, isPublic })
 
-        await fetchNotes()
-    }, [fetchNotes])
+        // Zapisujemy poprzedni stan na wypadek błędu
+        const previousNotes = [...notes]
+
+        // Optymistycznie aktualizujemy UI
+        setNotes(prevNotes =>
+            prevNotes.map(note =>
+                note.id === id ? { ...note, isPublic } : note
+            )
+        )
+
+        try {
+            // Wysyłamy żądanie do API z jasno określonym typem boolean
+            const response = await api.patch(
+                `/notes/${id}/visibility`,
+                { isPublic: Boolean(isPublic) },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+
+            console.log("API response:", response)
+        } catch (err) {
+            console.error("Error toggling note visibility:", err)
+
+            // W przypadku błędu przywracamy poprzedni stan
+            setNotes(previousNotes)
+
+            // Informujemy użytkownika o błędzie
+            setError("Failed to update note visibility")
+        }
+    }, [notes])
 
     useEffect(() => {
         fetchNotes()
