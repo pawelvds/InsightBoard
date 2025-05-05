@@ -40,7 +40,6 @@ export function NoteCard({
     }
 
     const handleToggle = (checked: boolean) => {
-        console.log("Switch toggled to:", checked)
 
         setIsPublic(checked)
 

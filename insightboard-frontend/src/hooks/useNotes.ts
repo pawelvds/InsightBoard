@@ -32,13 +32,11 @@ export function useNotes() {
             await api.delete(`/notes/${id}`)
             setNotes(prev => prev.filter(note => note.id !== id))
         } catch (err) {
-            console.error("Error deleting note:", err)
             setError("Failed to delete note")
         }
     }, [])
 
     const toggleNoteVisibility = useCallback(async (id: string, isPublic: boolean) => {
-        console.log("TOGGLE VISIBILITY:", { id, isPublic })
 
         const previousNotes = [...notes]
 
@@ -61,7 +59,6 @@ export function useNotes() {
 
             console.log("API response:", response)
         } catch (err) {
-            console.error("Error toggling note visibility:", err)
 
             setNotes(previousNotes)
 

@@ -162,7 +162,8 @@ public class NoteService: INoteService
                 Id = $"{n.Id}",
                 Title = n.Title,
                 Content = n.Content,
-                CreatedAt = n.CreatedAt
+                CreatedAt = n.CreatedAt,
+                IsPublic = n.IsPublic
             })
             .ToListAsync();
     }
