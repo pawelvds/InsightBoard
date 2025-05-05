@@ -30,7 +30,6 @@ export function useNotes() {
     const deleteNote = useCallback(async (id: string) => {
         try {
             await api.delete(`/notes/${id}`)
-            // Optymistycznie aktualizujemy stan
             setNotes(prev => prev.filter(note => note.id !== id))
         } catch (err) {
             console.error("Error deleting note:", err)
@@ -41,10 +40,8 @@ export function useNotes() {
     const toggleNoteVisibility = useCallback(async (id: string, isPublic: boolean) => {
         console.log("TOGGLE VISIBILITY:", { id, isPublic })
 
-        // Zapisujemy poprzedni stan na wypadek błędu
         const previousNotes = [...notes]
 
-        // Optymistycznie aktualizujemy UI
         setNotes(prevNotes =>
             prevNotes.map(note =>
                 note.id === id ? { ...note, isPublic } : note
@@ -52,7 +49,6 @@ export function useNotes() {
         )
 
         try {
-            // Wysyłamy żądanie do API z jasno określonym typem boolean
             const response = await api.patch(
                 `/notes/${id}/visibility`,
                 { isPublic: Boolean(isPublic) },
@@ -67,10 +63,8 @@ export function useNotes() {
         } catch (err) {
             console.error("Error toggling note visibility:", err)
 
-            // W przypadku błędu przywracamy poprzedni stan
             setNotes(previousNotes)
 
-            // Informujemy użytkownika o błędzie
             setError("Failed to update note visibility")
         }
     }, [notes])

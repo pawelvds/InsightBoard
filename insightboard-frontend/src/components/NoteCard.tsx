@@ -26,10 +26,8 @@ export function NoteCard({
                              onDelete,
                              onTogglePublish,
                          }: NoteCardProps) {
-    // Używamy lokalnego stanu do kontrolowania UI
     const [isPublic, setIsPublic] = useState(note.isPublic)
 
-    // Synchronizujemy lokalny stan, gdy zmieniają się props z zewnątrz
     useEffect(() => {
         if (note.isPublic !== isPublic) {
             setIsPublic(note.isPublic)
@@ -41,14 +39,11 @@ export function NoteCard({
         toast.success("Note copied to clipboard")
     }
 
-    // Obsługa zmiany stanu przełącznika
     const handleToggle = (checked: boolean) => {
         console.log("Switch toggled to:", checked)
 
-        // Aktualizacja lokalnego stanu
         setIsPublic(checked)
 
-        // Wywołanie funkcji z komponentu nadrzędnego
         if (onTogglePublish) {
             onTogglePublish(note.id, checked)
         }
@@ -99,7 +94,6 @@ export function NoteCard({
                 <div className="flex items-center justify-between pt-2 border-t">
                     <span className="text-xs">{isPublic ? "Published" : "Private"}</span>
 
-                    {/* Kluczowe jest użycie i checked i onCheckedChange dla kontrolowanego komponentu */}
                     <Switch
                         checked={isPublic}
                         onCheckedChange={handleToggle}
