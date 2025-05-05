@@ -93,7 +93,7 @@ public class NoteService: INoteService
 
     public async Task PublishNoteAsync(string noteId, string userId)
     {
-        var note = await _context.Notes.FindAsync(noteId);
+        var note = await _context.Notes.FindAsync(Guid.Parse(noteId));
         
         if (note == null)
             throw new NotFoundException("Note not found");
@@ -166,5 +166,16 @@ public class NoteService: INoteService
             })
             .ToListAsync();
     }
+    
+    public async Task SetNotePublicStatusAsync(string noteId, string userId, bool isPublic)
+    {
+        var note = await _context.Notes
+            .FirstOrDefaultAsync(n => n.Id.ToString() == noteId && n.AuthorId == userId);
 
+        if (note == null)
+            throw new NotFoundException("Note not found or access denied.");
+
+        note.IsPublic = isPublic;
+        await _context.SaveChangesAsync();
+    }
 }

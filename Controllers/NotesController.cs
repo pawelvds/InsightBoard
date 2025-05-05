@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using InsightBoard.Api.DTOs.Notes;
+using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Services.Notes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -100,7 +101,25 @@ public class NotesController : ControllerBase
     [HttpGet("public/{username}")]
     public async Task<ActionResult<IEnumerable<NoteDto>>> GetPublicByUsername(string username)
     {
-        var notes = await _noteService.GetPublicNotesAsync();
-        return Ok(notes);
+        try
+        {
+            var notes = await _noteService.GetPublicNotesByUsernameAsync(username);
+            return Ok(notes);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+    
+    [HttpPatch("{id}/visibility")]
+    public async Task<IActionResult> SetVisibility(string id, [FromBody] SetVisibilityRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+            return Unauthorized();
+
+        await _noteService.SetNotePublicStatusAsync(id, userId, request.IsPublic);
+        return NoContent();
     }
 }

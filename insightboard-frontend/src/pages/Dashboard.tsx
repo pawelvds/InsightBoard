@@ -9,7 +9,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Dashboard() {
     const navigate = useNavigate()
-    const { notes, loading, error, refresh, deleteNote } = useNotes()
+    const {
+        notes,
+        loading,
+        error,
+        refresh,
+        deleteNote,
+        toggleNoteVisibility,
+    } = useNotes()
 
     const [editingNote, setEditingNote] = useState<Note | null>(null)
     const [editOpen, setEditOpen] = useState(false)
@@ -86,6 +93,7 @@ export default function Dashboard() {
                             note={note}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onTogglePublish={toggleNoteVisibility}
                         />
                     ))}
                 </div>
