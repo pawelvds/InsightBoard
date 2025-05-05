@@ -8,7 +8,7 @@
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Note } from "@/hooks/useNotes"
-import { Pencil, Trash, Clipboard } from "lucide-react"
+import { Pencil, Trash, Clipboard, Globe, Lock } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
@@ -40,8 +40,13 @@ export function NoteCard({
     }
 
     const handleToggle = (checked: boolean) => {
-
         setIsPublic(checked)
+
+        if (checked) {
+            toast.success("Note published")
+        } else {
+            toast.success("Note set to private")
+        }
 
         if (onTogglePublish) {
             onTogglePublish(note.id, checked)
@@ -91,7 +96,19 @@ export function NoteCard({
             <CardContent className="text-sm text-muted-foreground whitespace-pre-wrap space-y-4">
                 <p>{note.content}</p>
                 <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="text-xs">{isPublic ? "Published" : "Private"}</span>
+                    <span className="text-xs flex items-center gap-1">
+                        {isPublic ? (
+                            <>
+                                <Globe className="h-3.5 w-3.5" />
+                                <span>Published</span>
+                            </>
+                        ) : (
+                            <>
+                                <Lock className="h-3.5 w-3.5" />
+                                <span>Private</span>
+                            </>
+                        )}
+                    </span>
 
                     <Switch
                         checked={isPublic}

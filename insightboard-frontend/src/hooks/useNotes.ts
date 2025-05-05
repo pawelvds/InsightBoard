@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from "react"
 import api from "../lib/api"
+import { toast } from "sonner"
 
 export interface Note {
     id: string
@@ -21,7 +22,6 @@ export function useNotes() {
             setNotes([...res.data])
         } catch (err) {
             setError("Failed to load notes")
-            console.error("Error fetching notes:", err)
         } finally {
             setLoading(false)
         }
@@ -31,12 +31,18 @@ export function useNotes() {
         try {
             await api.delete(`/notes/${id}`)
             setNotes(prev => prev.filter(note => note.id !== id))
+
+            toast.success("Note deleted successfully")
         } catch (err) {
             setError("Failed to delete note")
+
+            toast.error("Failed to delete note")
         }
     }, [])
 
     const toggleNoteVisibility = useCallback(async (id: string, isPublic: boolean) => {
+        const noteToUpdate = notes.find(note => note.id === id)
+        if (!noteToUpdate) return
 
         const previousNotes = [...notes]
 
@@ -47,7 +53,8 @@ export function useNotes() {
         )
 
         try {
-            const response = await api.patch(
+            // Wyślij żądanie do API
+            await api.patch(
                 `/notes/${id}/visibility`,
                 { isPublic: Boolean(isPublic) },
                 {
@@ -57,12 +64,10 @@ export function useNotes() {
                 }
             )
 
-            console.log("API response:", response)
         } catch (err) {
-
             setNotes(previousNotes)
 
-            setError("Failed to update note visibility")
+            toast.error(`Failed to ${isPublic ? 'publish' : 'unpublish'} note`)
         }
     }, [notes])
 
