@@ -1,45 +1,99 @@
-﻿📜 InsightBoard
+# 📜 InsightBoard
 
-InsightBoard is a lightweight platform to create, manage, and share personal notes.
-It provides secure authentication, private and public notes, and session handling with JWT and Refresh Tokens.
-Features
+**InsightBoard** is a lightweight platform for managing and sharing personal notes.  
+It supports private/public visibility, user authentication, and is built with a modern full-stack architecture.
 
-    🔒 User authentication with JWT & Refresh Tokens
+---
 
-    📝 Create private and public notes
+## ✨ Features
 
-    🔄 Publish and unpublish notes
+- 🔒 **Secure Authentication** using JWT & Refresh Tokens
+- 📝 **Create, Edit, Delete** notes with private/public visibility
+- 🔁 **Toggle note visibility** with one click
+- 🌍 **View public notes** via public user profiles
+- 📄 **Simple, responsive UI** (React + Tailwind CSS)
+- 🧠 **Planned: Rich Text Editing** (bold, lists, links etc.)
+- 🚀 **Built with:** ASP.NET Core 9.0, EF Core, PostgreSQL
 
-    📚 Pagination and sorting of public notes
+---
 
-    🚀 Built with ASP.NET Core 9.0, Entity Framework Core, PostgreSQL
+## ⚙️ Tech Stack
 
-Tech Stack
+### 🔧 Backend
+- ASP.NET Core 9.0
+- Entity Framework Core
+- AutoMapper
+- PostgreSQL
+- Docker (for DB)
 
-    ASP.NET Core 9.0
+### 💻 Frontend
+- React (Vite)
+- TypeScript
+- Tailwind CSS
+- Radix UI
+- Sonner (toasts)
 
-    PostgreSQL
+---
 
-    Entity Framework Core
+## 🏁 Getting Started
 
-    AutoMapper
+### 🔙 Backend
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/InsightBoard
 
-    Docker (Postgres)
+# 2. Navigate to the backend
+cd insightboard-backend
 
-Getting Started
+# 3. Configure database in appsettings.json
 
-    Clone the repository
+# 4. Apply migrations
+dotnet ef database update
 
-    Setup database connection string in appsettings.json
+# 5. Run the server
+dotnet run
+```
 
-    Run migrations: dotnet ef database update
+### 💻 Frontend
+```bash
+# Navigate to frontend
+cd insightboard-frontend
 
-    Run the project: dotnet run
+# Install dependencies
+npm install
 
-Future plans
+# Start dev server
+npm run dev
+```
 
-    Frontend app with React and TypeScript
+---
 
-    Redis cache for public notes
+## ✅ TODO (in progress)
 
-    Admin panel and advanced roles
+- [ ] ✍️ Unit tests for `NoteService`
+- [ ] 🧪 Add CI (GitHub Actions: test + lint)
+- [ ] 🪄 Add Rich Text Editor (`@tiptap/react` or `Quill`)
+- [ ] 📄 Public note detail page (e.g. `/note/:id`)
+- [ ] 👁️ Note view counters (basic analytics)
+- [ ] 🗃️ SQLite support for local/demo usage
+- [ ] 🐳 Dockerize fullstack (backend + frontend)
+- [ ] 🔒 Improve error handling (401/403 feedback)
+- [ ] 🧰 Add ESLint/Prettier config for frontend
+
+---
+
+## 📈 Future Plans
+
+- 🧵 Comments on public notes (basic thread support)
+- 🎨 Themes/dark mode toggle
+- 🛂 Admin dashboard (role-based management)
+- 📦 Redis cache for public notes
+- 📤 Note exporting (PDF/Markdown)
+- 📊 Dashboard metrics (notes, views, likes)
+- 👥 Followers/following system (optional)
+
+---
+
+## 📄 License
+
+MIT
