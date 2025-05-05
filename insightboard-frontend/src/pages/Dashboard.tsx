@@ -1,14 +1,22 @@
 ﻿import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "../components/ui/button"
-import { useNotes, Note } from "../hooks/useNotes"
-import { NewNoteDialog } from "../components/NewNoteDialog"
-import { NoteCard } from "../components/NoteCard"
-import { EditNoteDialog } from "../components/EditNoteDialog"
+import { Button } from "@/components/ui/button"
+import { useNotes, Note } from "@/hooks/useNotes"
+import { NewNoteDialog } from "@/components/NewNoteDialog"
+import { NoteCard } from "@/components/NoteCard"
+import { EditNoteDialog } from "@/components/EditNoteDialog"
+import { Skeleton } from "@/components/ui/skeleton"
 
-function Dashboard() {
+export default function Dashboard() {
     const navigate = useNavigate()
-    const { notes, loading, error, refresh, deleteNote } = useNotes()
+    const {
+        notes,
+        loading,
+        error,
+        refresh,
+        deleteNote,
+        toggleNoteVisibility,
+    } = useNotes()
 
     const [editingNote, setEditingNote] = useState<Note | null>(null)
     const [editOpen, setEditOpen] = useState(false)
@@ -43,39 +51,49 @@ function Dashboard() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Your Dashboard</h1>
+        <div className="min-h-screen px-6 py-10 bg-background text-foreground">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+                <div>
+                    <h1 className="text-3xl font-bold">Your Dashboard</h1>
+                    <p className="text-muted-foreground text-sm">
+                        Manage and organize your personal notes.
+                    </p>
+                </div>
                 <div className="flex gap-2">
                     <NewNoteDialog onNoteCreated={refresh} />
-                    <Button variant="destructive" onClick={handleLogout}>
-                        Logout
-                    </Button>
+                    <Button variant="outline" onClick={handleLogout}>Logout</Button>
                 </div>
-            </div>
+            </header>
 
             {loading && (
-                <div className="text-muted-foreground">Loading notes...</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
+                        <Skeleton key={i} className="h-36 w-full rounded-lg" />
+                    ))}
+                </div>
             )}
 
             {error && (
-                <div className="text-red-500">Something went wrong: {error}</div>
+                <div className="text-red-500 text-sm mb-4">
+                    Something went wrong: {error}
+                </div>
             )}
 
             {!loading && notes.length === 0 && (
-                <div className="border rounded-lg p-4 bg-muted/50 text-muted-foreground">
-                    You don’t have any notes yet.
+                <div className="border border-dashed rounded-lg p-6 text-center text-muted-foreground bg-muted/40">
+                    You don’t have any notes yet. Start by creating one!
                 </div>
             )}
 
             {!loading && notes.length > 0 && (
-                <div className="grid gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {notes.map((note) => (
                         <NoteCard
                             key={note.id}
                             note={note}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onTogglePublish={toggleNoteVisibility}
                         />
                     ))}
                 </div>
@@ -90,5 +108,3 @@ function Dashboard() {
         </div>
     )
 }
-
-export default Dashboard

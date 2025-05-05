@@ -1,71 +1,100 @@
-﻿import { useState } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+﻿import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import axios from "axios"
 
-function Register() {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+
+export default function Register() {
     const navigate = useNavigate()
-    const [username, setUsername] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setError('')
+        setError("")
 
         try {
-            const response = await axios.post('http://localhost:5085/api/auth/register', {
+            const res = await axios.post("http://localhost:5085/api/auth/register", {
                 username,
                 email,
                 password,
             })
-
-            localStorage.setItem('token', response.data.token)
-            localStorage.setItem('refreshToken', response.data.refreshToken)
-
-            navigate('/dashboard')
-        } catch (err) {
-            setError('Registration failed. Try again.')
+            localStorage.setItem("token", res.data.token)
+            localStorage.setItem("refreshToken", res.data.refreshToken)
+            navigate("/dashboard")
+        } catch {
+            setError("Registration failed. Please try again.")
         }
     }
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-50">
-            <div className="bg-white p-8 rounded shadow w-full max-w-sm">
-                <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        className="w-full p-2 border rounded"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full p-2 border rounded"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="w-full p-2 border rounded"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button
-                        type="submit"
-                        className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
-                    >
-                        Sign Up
-                    </button>
-                </form>
+        <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
+            {/* Left section */}
+            <div className="hidden md:flex items-center justify-center bg-primary text-primary-foreground p-10">
+                <div className="max-w-md space-y-6 text-center">
+                    <h2 className="text-4xl font-bold">InsightBoard</h2>
+                    <p className="text-lg">Create an account and start organizing your notes effectively.</p>
+                </div>
+            </div>
+
+            {/* Right section */}
+            <div className="flex items-center justify-center p-6">
+                <Card className="w-full max-w-sm shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="text-2xl">Sign Up</CardTitle>
+                    </CardHeader>
+                    <form onSubmit={handleSubmit}>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="username">Username</Label>
+                                <Input
+                                    id="username"
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            {error && <p className="text-sm text-red-500">{error}</p>}
+                            <Button type="submit" className="w-full">
+                                Create Account
+                            </Button>
+
+                            <p className="text-center text-sm text-muted-foreground mt-2">
+                                Already have an account?{" "}
+                                <Link to="/login" className="text-primary underline">
+                                    Sign in
+                                </Link>
+                            </p>
+                        </CardContent>
+                    </form>
+                </Card>
             </div>
         </div>
     )
 }
-
-export default Register

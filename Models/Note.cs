@@ -8,7 +8,6 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string AuthorId { get; set; } = string.Empty;
         public ICollection<Question> Questions { get; set; } = new List<Question>();
-        
         public bool IsPublic { get; set; } = false;
     }
 }

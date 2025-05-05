@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using InsightBoard.Api.DTOs.Notes;
+using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Services.Notes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ public class NotesController : ControllerBase
         var createdNote = await _noteService.CreateAsync(request, userId);
         return CreatedAtAction(nameof(GetAll), new { id = createdNote.Id }, createdNote);
     }
-    
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, [FromBody] UpdateNoteRequest request)
     {
@@ -57,7 +58,7 @@ public class NotesController : ControllerBase
         await _noteService.UpdateNoteAsync(id, request, userId);
         return NoContent();
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -93,6 +94,32 @@ public class NotesController : ControllerBase
 
         await _noteService.UnpublishNoteAsync(id, userId);
 
+        return NoContent();
+    }
+
+    [AllowAnonymous]
+    [HttpGet("public/{username}")]
+    public async Task<ActionResult<IEnumerable<NoteDto>>> GetPublicByUsername(string username)
+    {
+        try
+        {
+            var notes = await _noteService.GetPublicNotesByUsernameAsync(username);
+            return Ok(notes);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+    
+    [HttpPatch("{id}/visibility")]
+    public async Task<IActionResult> SetVisibility(string id, [FromBody] SetVisibilityRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+            return Unauthorized();
+
+        await _noteService.SetNotePublicStatusAsync(id, userId, request.IsPublic);
         return NoContent();
     }
 }

@@ -1,11 +1,13 @@
 ﻿import { useCallback, useEffect, useState } from "react"
 import api from "../lib/api"
+import { toast } from "sonner"
 
 export interface Note {
     id: string
     title: string
     content: string
     createdAt: string
+    isPublic: boolean
 }
 
 export function useNotes() {
@@ -17,8 +19,8 @@ export function useNotes() {
         try {
             setLoading(true)
             const res = await api.get<Note[]>("/notes")
-            setNotes(res.data)
-        } catch {
+            setNotes([...res.data])
+        } catch (err) {
             setError("Failed to load notes")
         } finally {
             setLoading(false)
@@ -26,13 +28,59 @@ export function useNotes() {
     }, [])
 
     const deleteNote = useCallback(async (id: string) => {
-        await api.delete(`/notes/${id}`)
-        await fetchNotes()
-    }, [fetchNotes])
+        try {
+            await api.delete(`/notes/${id}`)
+            setNotes(prev => prev.filter(note => note.id !== id))
+
+            toast.success("Note deleted successfully")
+        } catch (err) {
+            setError("Failed to delete note")
+
+            toast.error("Failed to delete note")
+        }
+    }, [])
+
+    const toggleNoteVisibility = useCallback(async (id: string, isPublic: boolean) => {
+        const noteToUpdate = notes.find(note => note.id === id)
+        if (!noteToUpdate) return
+
+        const previousNotes = [...notes]
+
+        setNotes(prevNotes =>
+            prevNotes.map(note =>
+                note.id === id ? { ...note, isPublic } : note
+            )
+        )
+
+        try {
+            // Wyślij żądanie do API
+            await api.patch(
+                `/notes/${id}/visibility`,
+                { isPublic: Boolean(isPublic) },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+
+        } catch (err) {
+            setNotes(previousNotes)
+
+            toast.error(`Failed to ${isPublic ? 'publish' : 'unpublish'} note`)
+        }
+    }, [notes])
 
     useEffect(() => {
         fetchNotes()
     }, [fetchNotes])
 
-    return { notes, loading, error, refresh: fetchNotes, deleteNote }
+    return {
+        notes,
+        loading,
+        error,
+        refresh: fetchNotes,
+        deleteNote,
+        toggleNoteVisibility,
+    }
 }
