@@ -29,7 +29,7 @@ namespace InsightBoard.Tests.Services.Notes
         {
             // Arrange
             var username = "testuser";
-            
+    
             var notes = new List<Note>
             {
                 new Note
@@ -38,7 +38,7 @@ namespace InsightBoard.Tests.Services.Notes
                     Title = "Note 1",
                     Content = "Some public content",
                     CreatedAt = DateTime.UtcNow,
-                    AuthorId = "user-id",
+                    UserId = "user-id",
                     IsPublic = true
                 }
             };
@@ -65,9 +65,10 @@ namespace InsightBoard.Tests.Services.Notes
             result.Should().NotBeNull();
             result.Should().HaveCount(1);
             result.First().Title.Should().Be("Note 1");
-            
+    
             // Verify
             _noteRepoMock.Verify(r => r.GetPublicNotesByUsernameAsync(username), Times.Once);
         }
+
     }
 }
