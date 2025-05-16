@@ -8,9 +8,21 @@ public class InsightBoardDbContext : DbContext
     public InsightBoardDbContext(DbContextOptions<InsightBoardDbContext> options)
         : base(options) { }
 
-public DbSet<Note> Notes => Set<Note>();
-         public DbSet<Question> Questions => Set<Question>();
-         public DbSet<Answer> Answers => Set<Answer>();
-         public DbSet<User> Users => Set<User>();
-         public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Note> Notes => Set<Note>();
+    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<Answer> Answers => Set<Answer>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+
+        modelBuilder.Entity<Note>()
+            .HasOne(n => n.Author)
+            .WithMany()
+            .HasForeignKey(n => n.AuthorId)
+            .IsRequired();
+    }
 }
