@@ -1,6 +1,7 @@
 using System.Text;
 using InsightBoard.Api.Data;
 using InsightBoard.Api.Middleware;
+using InsightBoard.Api.Repositories;
 using InsightBoard.Api.Services.Auth;
 using InsightBoard.Api.Services.Notes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +14,9 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<InsightBoardDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>(); 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<INoteService, NoteService>();
