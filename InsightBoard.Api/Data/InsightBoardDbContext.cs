@@ -18,11 +18,14 @@ public class InsightBoardDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-
         modelBuilder.Entity<Note>()
-            .HasOne(n => n.Author)
+            .HasOne(n => n.User)
             .WithMany()
-            .HasForeignKey(n => n.AuthorId)
+            .HasForeignKey(n => n.UserId) 
             .IsRequired();
+        
+        modelBuilder.Entity<Note>()
+            .Property(n => n.UserId)
+            .HasColumnName("AuthorId");
     }
 }

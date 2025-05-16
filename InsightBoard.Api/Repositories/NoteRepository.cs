@@ -19,14 +19,17 @@ public class NoteRepository : INoteRepository
     public async Task<IEnumerable<Note>> GetAllByUserIdAsync(string userId)
     {
         return await _context.Notes
-            .Where(n => n.AuthorId == userId)
+            .Include(n => n.User)
+            .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
     }
 
     public async Task<Note?> GetByIdAsync(Guid id)
     {
-        return await _context.Notes.FindAsync(id);
+        return await _context.Notes
+            .Include(n => n.User)
+            .FirstOrDefaultAsync(n => n.Id == id);
     }
 
     public async Task CreateAsync(Note note)
@@ -55,7 +58,8 @@ public class NoteRepository : INoteRepository
             throw new NotFoundException("User not found.");
 
         return await _context.Notes
-            .Where(n => n.IsPublic && n.AuthorId == user.Id)
+            .Include(n => n.User)
+            .Where(n => n.IsPublic && n.UserId == user.Id)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
     }
@@ -63,6 +67,7 @@ public class NoteRepository : INoteRepository
     public async Task<IEnumerable<Note>> GetPublicNotesAsync()
     {
         return await _context.Notes
+            .Include(n => n.User)
             .Where(n => n.IsPublic)
             .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
@@ -71,6 +76,7 @@ public class NoteRepository : INoteRepository
     public async Task<(IEnumerable<Note>, int)> GetPublicNotesPagedAsync(int pageNumber, int pageSize, string? sortBy)
     {
         var query = _context.Notes
+            .Include(n => n.User)
             .Where(n => n.IsPublic);
 
         query = sortBy switch
