@@ -43,21 +43,22 @@ public class ErrorHandlingMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unhandled exception occurred.");
-            
+    
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var response = new
             {
                 status = context.Response.StatusCode,
-                message = "Something went wrong. Please contact the developers team."
+                message = "Something went wrong. Please contact the developers team.",
+                error = ex.Message, 
+                stackTrace = ex.StackTrace  
             };
-            
+    
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             var json = JsonSerializer.Serialize(response, options);
-            
+    
             await context.Response.WriteAsync(json);
-
         }
     }
 }
