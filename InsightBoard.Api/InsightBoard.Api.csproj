@@ -21,12 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="InsightBoard.Tests\UnitTest1.cs">
-        <Link>InsightBoardTests\UnitTest1.cs</Link>
-      </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\InsightBoard.Tests.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\InsightBoardTests.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\project.assets.json" />

@@ -6,11 +6,8 @@ using InsightBoard.Api.DTOs.Auth;
 using InsightBoard.Api.Exceptions;
 using InsightBoard.Api.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using LoginRequest = InsightBoard.Api.DTOs.Auth.LoginRequest;
-using RegisterRequest = InsightBoard.Api.DTOs.Auth.RegisterRequest;
 
 namespace InsightBoard.Api.Services.Auth;
 
@@ -44,16 +41,28 @@ public class AuthService : IAuthService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         
+        var jwtToken = GenerateJwtToken(user, out DateTime expires);
+        
         var refreshToken = new RefreshToken
         {
+            Token = Guid.NewGuid().ToString(),
+            JwtId = jwtToken.Id,
             UserId = user.Id,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            CreationDate = DateTime.UtcNow,
+            ExpiryDate = DateTime.UtcNow.AddDays(7),
+            Used = false,
+            Invalidated = false
         };
 
         _context.RefreshTokens.Add(refreshToken);
         await _context.SaveChangesAsync();
 
-        return GenerateAuthResponse(user, refreshToken.Id);
+        return new AuthResponse
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+            Expiration = expires,
+            RefreshToken = refreshToken.Token
+        };
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -72,58 +81,81 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Wrong email or password.");
         }
 
-
+        var jwtToken = GenerateJwtToken(user, out DateTime expires);
+        
         var refreshToken = new RefreshToken
         {
+            Token = Guid.NewGuid().ToString(),
+            JwtId = jwtToken.Id,
             UserId = user.Id,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            CreationDate = DateTime.UtcNow,
+            ExpiryDate = DateTime.UtcNow.AddDays(7),
+            Used = false,
+            Invalidated = false
         };
 
         _context.RefreshTokens.Add(refreshToken);
         await _context.SaveChangesAsync();
 
-        return GenerateAuthResponse(user, refreshToken.Id);
+        return new AuthResponse
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+            Expiration = expires,
+            RefreshToken = refreshToken.Token
+        };
     }
 
     public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
         var refreshToken = await _context.RefreshTokens
             .Include(rt => rt.User)
-            .SingleOrDefaultAsync(r => r.Id == request.RefreshToken);
+            .SingleOrDefaultAsync(r => r.Token == request.RefreshToken);
 
-        if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresAt < DateTime.UtcNow)
+        if (refreshToken == null || refreshToken.Used || refreshToken.Invalidated || refreshToken.ExpiryDate < DateTime.UtcNow)
         {
             throw new UnauthorizedException("Invalid refresh token.");
         }
 
-
-        refreshToken.IsRevoked = true;
-
+        refreshToken.Used = true;
+        
+        var jwtToken = GenerateJwtToken(refreshToken.User, out DateTime expires);
+        
         var newRefreshToken = new RefreshToken
         {
+            Token = Guid.NewGuid().ToString(),
+            JwtId = jwtToken.Id,
             UserId = refreshToken.UserId,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            CreationDate = DateTime.UtcNow,
+            ExpiryDate = DateTime.UtcNow.AddDays(7),
+            Used = false,
+            Invalidated = false
         };
 
         _context.RefreshTokens.Add(newRefreshToken);
         await _context.SaveChangesAsync();
 
-        return GenerateAuthResponse(refreshToken.User, newRefreshToken.Id);
+        return new AuthResponse
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+            Expiration = expires,
+            RefreshToken = newRefreshToken.Token
+        };
     }
 
-    private AuthResponse GenerateAuthResponse(User user, string refreshTokenId)
+    private JwtSecurityToken GenerateJwtToken(User user, out DateTime expires)
     {
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username)
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var expires = DateTime.UtcNow.AddMinutes(15); 
+        expires = DateTime.UtcNow.AddMinutes(15); 
 
         var token = new JwtSecurityToken(
             _configuration["Jwt:Issuer"],
@@ -133,13 +165,6 @@ public class AuthService : IAuthService
             signingCredentials: creds
         );
         
-        Console.WriteLine("JWT key length: " + (_configuration["Jwt:Key"]?.Length ?? 0));
-
-        return new AuthResponse
-        {
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
-            Expiration = expires,
-            RefreshToken = refreshTokenId
-        };
+        return token;
     }
 }

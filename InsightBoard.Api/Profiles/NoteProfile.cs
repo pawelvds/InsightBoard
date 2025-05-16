@@ -8,7 +8,9 @@ public class NoteProfile : Profile
 {
     public NoteProfile()
     {
-        CreateMap<Note, NoteDto>();
+        CreateMap<Note, NoteDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
+        
         CreateMap<CreateNoteRequest, Note>();
     }
 }

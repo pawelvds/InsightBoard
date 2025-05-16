@@ -30,7 +30,7 @@ public class NoteService : INoteService
         {
             Title = request.Title,
             Content = request.Content,
-            AuthorId = userId,
+            UserId = userId,
         };
         
         await _noteRepository.CreateAsync(note);
@@ -51,7 +51,7 @@ public class NoteService : INoteService
             throw new NotFoundException("Note not found.");
         }
         
-        if (note.AuthorId != userId)
+        if (note.UserId != userId)
         {
             throw new UnauthorizedException("You are not authorized to update this note.");
         }
@@ -76,7 +76,7 @@ public class NoteService : INoteService
             throw new NotFoundException("Note not found.");
         }
         
-        if (note.AuthorId != userId)
+        if (note.UserId != userId)
         {
             throw new UnauthorizedException("You are not authorized to delete this note.");
         }
@@ -102,7 +102,7 @@ public class NoteService : INoteService
         if (note == null)
             throw new NotFoundException("Note not found");
         
-        if (note.AuthorId != userId)
+        if (note.UserId != userId)
             throw new UnauthorizedException("You are not authorized to publish this note");
         
         note.IsPublic = true;
@@ -121,7 +121,7 @@ public class NoteService : INoteService
         if (note == null)
             throw new NotFoundException("Note not found");
         
-        if (note.AuthorId != userId)
+        if (note.UserId != userId)
             throw new UnauthorizedException("You are not authorized to unpublish this note");
         
         note.IsPublic = false;
@@ -159,7 +159,7 @@ public class NoteService : INoteService
         if (note == null)
             throw new NotFoundException("Note not found");
         
-        if (note.AuthorId != userId)
+        if (note.UserId != userId)
             throw new UnauthorizedException("You are not authorized to modify this note");
         
         note.IsPublic = isPublic;
