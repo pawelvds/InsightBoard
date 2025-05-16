@@ -26,4 +26,11 @@
       </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\InsightBoard.Tests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\InsightBoardTests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="InsightBoard.Tests\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>
