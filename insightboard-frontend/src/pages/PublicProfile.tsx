@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useAuth } from "@/contexts/AuthContext"
+
 import api from "@/lib/api"
 import { Note } from "@/hooks/useNotes"
 import { Card } from "@/components/ui/card"
