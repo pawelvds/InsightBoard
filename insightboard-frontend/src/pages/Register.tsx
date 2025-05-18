@@ -1,6 +1,6 @@
 ﻿import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import axios from "axios"
+import { useAuth } from "@/contexts/AuthContext"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,26 +9,35 @@ import { Button } from "@/components/ui/button"
 
 export default function Register() {
     const navigate = useNavigate()
+    const { register } = useAuth()
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError("")
+        setIsLoading(true)
 
         try {
-            const res = await axios.post("http://localhost:5085/api/auth/register", {
+            const success = await register({
                 username,
                 email,
                 password,
             })
-            localStorage.setItem("token", res.data.token)
-            localStorage.setItem("refreshToken", res.data.refreshToken)
-            navigate("/dashboard")
-        } catch {
-            setError("Registration failed. Please try again.")
+
+            if (success) {
+                navigate("/dashboard")
+            } else {
+                setError("Registration failed. Please try again.")
+            }
+        } catch (error) {
+            setError("An error occurred during registration")
+            console.error(error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -58,6 +67,7 @@ export default function Register() {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -68,6 +78,7 @@ export default function Register() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -78,11 +89,12 @@ export default function Register() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
+                                    disabled={isLoading}
                                 />
                             </div>
                             {error && <p className="text-sm text-red-500">{error}</p>}
-                            <Button type="submit" className="w-full">
-                                Create Account
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading ? "Creating account..." : "Create Account"}
                             </Button>
 
                             <p className="text-center text-sm text-muted-foreground mt-2">

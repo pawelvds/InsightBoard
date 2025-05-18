@@ -1,14 +1,13 @@
-﻿import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+﻿// src/pages/Dashboard.tsx
+import { useState } from "react"
 import { useNotes, Note } from "@/hooks/useNotes"
 import { NewNoteDialog } from "@/components/NewNoteDialog"
 import { NoteCard } from "@/components/NoteCard"
 import { EditNoteDialog } from "@/components/EditNoteDialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { UserMenu } from "@/components/UserMenu"
 
 export default function Dashboard() {
-    const navigate = useNavigate()
     const {
         notes,
         loading,
@@ -20,19 +19,6 @@ export default function Dashboard() {
 
     const [editingNote, setEditingNote] = useState<Note | null>(null)
     const [editOpen, setEditOpen] = useState(false)
-
-    useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            navigate("/login")
-        }
-    }, [navigate])
-
-    const handleLogout = () => {
-        localStorage.removeItem("token")
-        localStorage.removeItem("refreshToken")
-        navigate("/login")
-    }
 
     const handleEdit = (note: Note) => {
         setEditingNote(note)
@@ -59,9 +45,9 @@ export default function Dashboard() {
                         Manage and organize your personal notes.
                     </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-4">
                     <NewNoteDialog onNoteCreated={refresh} />
-                    <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                    <UserMenu />
                 </div>
             </header>
 
@@ -81,7 +67,7 @@ export default function Dashboard() {
 
             {!loading && notes.length === 0 && (
                 <div className="border border-dashed rounded-lg p-6 text-center text-muted-foreground bg-muted/40">
-                    You don’t have any notes yet. Start by creating one!
+                    You don't have any notes yet. Start by creating one!
                 </div>
             )}
 
