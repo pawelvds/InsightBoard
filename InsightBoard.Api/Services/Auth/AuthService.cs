@@ -36,7 +36,7 @@ public class AuthService : IAuthService
             Email = request.Email,
         };
 
-        user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+        user.PasswordHash = HashPassword(user, request.Password);
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
@@ -74,7 +74,7 @@ public class AuthService : IAuthService
             throw new UnauthorizedException("Wrong email or password.");
         }
 
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+        var result = VerifyPassword(user, request.Password);
 
         if (result == PasswordVerificationResult.Failed)
         {
@@ -142,7 +142,17 @@ public class AuthService : IAuthService
         };
     }
 
-    private JwtSecurityToken GenerateJwtToken(User user, out DateTime expires)
+    protected virtual string HashPassword(User user, string password)
+    {
+        return _passwordHasher.HashPassword(user, password);
+    }
+
+    protected virtual PasswordVerificationResult VerifyPassword(User user, string password)
+    {
+        return _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+    }
+
+    protected virtual JwtSecurityToken GenerateJwtToken(User user, out DateTime expires)
     {
         var claims = new List<Claim>
         {
